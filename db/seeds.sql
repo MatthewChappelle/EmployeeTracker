@@ -28,21 +28,19 @@ VALUES
     ('IT Employee', 60000, 7);
 
 -- Employees
-INSERT INTO employee(first_name, last_name, role_id, manager_id)
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES
     ('John', 'Doe', 1, 1),
     ('Jane', 'Doe', 2, 1),
-    ('Amber', 'Smith', 3, 2),
-    ('Jayden', 'Powers', 4, 2)
-    ('Aiden', 'Doe', 5, 3),
-    ('Sarah', 'Williams', 5, 3),
-    ('Austin', 'Gold', 6, 4),
-    ('Robert', 'Watt', 7, 4),
-    ('Mitchel', 'Walker', 8, 5),
-    ('Ken', 'Neyith', 9, 5),
-    ('David', 'Bowie', 10, 6);
-    ('Joseph', 'Singleton', 11, 6);
-    ('John', 'Lemon', 12, 7);
-    ('Richard', 'Seltzer', 13, 7);
-    ('George', 'Harvey', 14, 8);
-    ('Isaic', 'Palmer', 15, 8);
+    ('Amber', 'Smith', 3, 3),
+    ('Jayden', 'Powers', 4, 3),
+    ('Aiden', 'Doe', 5, 5),
+    ('Sarah', 'Williams', 6, 5),
+    ('Austin', 'Gold', 7, 7),
+    ('Robert', 'Watt', 8, 7),
+    ('Mitchel', 'Walker', 9, 9),
+    ('Ken', 'Neyith', 10, 9),
+    ('David', 'Bowie', 11, 11),
+    ('Joseph', 'Singleton', 12, 11),
+    ('John', 'Lemon', 13, 13),
+    ('Richard', 'Seltzer', 14, 13);

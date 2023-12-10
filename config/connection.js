@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 require('dotenv').config();
 
+// Create connection to our database, pass in your MySQL information for username and password
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
@@ -13,4 +14,5 @@ const sequelize = new Sequelize(
   }
 );
 
+// Export the connection
 module.exports = sequelize;
