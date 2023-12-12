@@ -12,66 +12,79 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-sequelize.sync().then(() => {
-    app.listen(PORT, () => console.log('Now listening'));
-});
+//check is database is working and logged in properly
+sequelize.authenticate()
+    .then(() => {
+        console.log('Connection has been established successfully.');
+        //run sequelize.sync to create tables from models
+        return sequelize.sync();
+    })
+    .then(() => {
+        //start server
+        app.listen(PORT, () => console.log('Now listening'));
+        //call promptUser function
+        promptUser();
+    })
+    .catch(err => {
+        console.error('Unable to connect to the database:', err);
+    });
+
 
 // Prompts for the user to select an action
-const InquirerPrompt = () => {
-    inquirer
-        .prompt([
-            {
-                type: 'list',
-                name: 'choices',
-                message: 'What would you like to do?',
-                choices: [
-                    'View All Employees',
-                    'Add Employee',
-                    'Update Employee Role',
-                    'View All Roles',
-                    'Add Role',
-                    'View All Departments',
-                    'Add Department',
-                    'Exit',
-                ],
-            },
-        ])
-        // Switch statement to handle the user's selection
-        .then((answers) => {
+const promptUser = async () => {
+    const answers = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'choices',
+            message: 'What would you like to do?',
+            choices: [
+                'View All Employees',
+                'Add Employee',
+                'Update Employee Role',
+                'View All Roles',
+                'Add Role',
+                'View All Departments',
+                'Add Department',
+                'Exit',
+            ],
+        },
+    ])
+        .then(answers => {
             const { choices } = answers;
 
-            if (choices === 'View All Employees') {
-                showEmployees();
+            //switch case for each choice calling the relative function
+            switch (choices) {
+                case 'View All Employees':
+                    showEmployees();
+                    break;
+                case 'Add Employee':
+                    addEmployees();
+                    break;
+                case 'Update Employee Role':
+                    updateEmployeeRole();
+                    break;
+                case 'View All Roles':
+                    showRoles();
+                    break;
+                case 'Add Role':
+                    addRoles();
+                    break;
+                case 'View All Departments':
+                    showDepartments();
+                    break;
+                case 'Add Department':
+                    addDepartments();
+                    break;
+                case 'Exit':
+                    sequelize.close();
+                    process.exit();
+                default:
+                    console.log('Invalid choice');
+                    break;
             }
-
-            if (choices === 'Add Employee') {
-                addEmployees();
-            }
-
-            if (choices === 'Update Employee Role') {
-                updateEmployeeRole();
-            }
-
-            if (choices === 'View All Roles') {
-                showRoles();
-            }
-
-            if (choices === 'Add Role') {
-                addRoles();
-            }
-
-            if (choices === 'View All Departments') {
-                showDepartments();
-            }
-
-            if (choices === 'Add Department') {
-                addDepartments();
-            }
-
-            if (choices === 'Exit') {
-                sequelize.close();
-                process.exit();
-            }
+        })
+        .catch(err => {
+            console.error(err);
         });
 };
 
@@ -105,10 +118,10 @@ const showEmployees = async () => {
         }));
 
         console.table(employeeData);
-        InquirerPrompt();
+        promptUser();
     } catch (err) {
         console.error(err);
-        InquirerPrompt();
+        promptUser();
     }
 };
 
@@ -161,10 +174,10 @@ const addEmployees = async () => {
 
         console.log(`Added ${firstName} ${lastName} to employees.`);
         // Return to the main menu
-        InquirerPrompt();
+        promptUser();
     } catch (err) {
         console.error(err);
-        InquirerPrompt();
+        promptUser();
     }
 };
 
@@ -226,10 +239,10 @@ const updateEmployeeRole = async () => {
         );
 
         console.log('Employee role updated.');
-        InquirerPrompt();
+        promptUser();
     } catch (err) {
         console.error(err);
-        InquirerPrompt();
+        promptUser();
     }
 };
 
@@ -250,24 +263,39 @@ const showRoles = async () => {
         }));
 
         console.table(roleData);
-        InquirerPrompt();
+        promptUser();
     } catch (err) {
         console.error(err);
-        InquirerPrompt();
+        promptUser();
     }
 };
 
+// Helper to get all department choices
+function getDepartmentChoices() {
+    return Department.findAll()
+        .then((departments) => {
+            return departments.map((department) => ({
+                name: department.name,
+                value: department.id,
+            }));
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+};
+
 // Helper to get all role choices
-async function getRoleChoices() {
-    try {
-        const roles = await Role.findAll();
-        return roles.map(role => ({
-            name: role.title,
-            value: role.id,
-        }));
-    } catch (err) {
-        console.error(err);
-    }
+function getRoleChoices() {
+    return Role.findAll()
+        .then(roles => {
+            return roles.map(role => ({
+                name: role.title,
+                value: role.id,
+            }));
+        })
+        .catch(err => {
+            console.error(err);
+        });
 };
 
 // Add new roles info
@@ -306,7 +334,7 @@ const addRoles = async () => {
         showRoles();
     } catch (err) {
         console.error(err);
-        InquirerPrompt();
+        promptUser();
     }
 };
 
@@ -331,43 +359,33 @@ const showDepartments = async () => {
     }
 
     // Continue with the inquirer prompts
-    InquirerPrompt();
-};
-
-// Helper to get all department choices
-async function getDepartmentChoices() {
-    try {
-        const departments = await Department.findAll();
-        return departments.map(department => ({
-            name: department.name,
-            value: department.id,
-        }));
-    } catch (err) {
-        console.error(err);
-    }
+    promptUser();
 };
 
 //function to add new departments
-async function addDepartments() {
-    try {
-        const answer = await inquirer.prompt([
-            {
-                type: 'input',
-                name: 'name',
-                message: 'Enter the department name:',
-            },
-        ]);
+function addDepartments() {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'name',
+            message: 'Enter the department name:',
+        },
+    ])
+        .then(answer => {
+            const { name } = answer;
 
-        const { name } = answer;
-
-        await Department.create({ name });
-
-        console.log(`Added ${name} department.`);
-        showDepartments();
-    } catch (err) {
-        console.error(err);
-        InquirerPrompt();
-    }
+            Department.create({ name })
+                .then(() => {
+                    console.log(`Added ${name} department.`);
+                    showDepartments();
+                })
+                .catch(err => {
+                    console.error(err);
+                    promptUser();
+                });
+        })
+        .catch(err => {
+            console.error(err);
+            promptUser();
+        });
 };
-
-InquirerPrompt();
