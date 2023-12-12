@@ -270,6 +270,20 @@ const showRoles = async () => {
     }
 };
 
+// Helper to get all department choices
+function getDepartmentChoices() {
+    return Department.findAll()
+        .then((departments) => {
+            return departments.map((department) => ({
+                name: department.name,
+                value: department.id,
+            }));
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+};
+
 // Helper to get all role choices
 function getRoleChoices() {
     return Role.findAll()
@@ -346,20 +360,6 @@ const showDepartments = async () => {
 
     // Continue with the inquirer prompts
     promptUser();
-};
-
-// Helper to get all department choices
-function getRoleChoices() {
-    return Role.findAll()
-        .then(roles => {
-            return roles.map(role => ({
-                name: role.title,
-                value: role.id,
-            }));
-        })
-        .catch(err => {
-            console.error(err);
-        });
 };
 
 //function to add new departments
